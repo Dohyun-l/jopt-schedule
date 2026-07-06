@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>JOPT 2026 Tokyo #02 일정표</title>
+<style>
+  :root{
+    --bg:#0f1115; --panel:#171a21; --panel2:#1e2129; --border:#2a2e38;
+    --text:#e8e9ec; --muted:#9aa0ac; --accent:#e0b04a; --accent2:#4ac0e0;
+    --nlh:#4a7ce0; --plo:#e04a7c; --flmix:#4ae08c; --sat:#9a9aa0; --special:#e0b04a;
+  }
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0; font-family:-apple-system,"Malgun Gothic","Apple SD Gothic Neo",sans-serif;
+    background:var(--bg); color:var(--text); padding:24px;
+    overflow-x:hidden;
+  }
+  h1{font-size:22px; margin:0 0 4px;}
+  .sub{color:var(--muted); font-size:13px; margin-bottom:20px;}
+  .tabs{display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap;}
+  .tab-btn{
+    background:var(--panel); border:1px solid var(--border); color:var(--muted);
+    padding:10px 18px; border-radius:8px; cursor:pointer; font-size:14px; font-weight:600;
+    transition:all .15s; flex:1 1 auto;
+  }
+  .tab-btn:hover{color:var(--text); border-color:var(--accent2);}
+  .tab-btn.active{background:var(--accent); color:#1a1a1a; border-color:var(--accent);}
+  .panel{display:none; background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:16px;}
+  .panel.active{display:block;}
+  .desc{color:var(--muted); font-size:13px; margin-bottom:14px;}
+  table{width:100%; border-collapse:collapse; font-size:13px;}
+  thead th{
+    text-align:left; padding:10px 10px; background:var(--panel2); color:var(--muted);
+    border-bottom:1px solid var(--border); position:sticky; top:0; font-weight:600;
+    white-space:nowrap;
+  }
+  tbody td{padding:8px 10px; border-bottom:1px solid var(--border); vertical-align:top;}
+  tbody tr:hover{background:var(--panel2);}
+  .grp-row td{
+    background:#20242e; font-weight:700; color:var(--accent); padding-top:14px; padding-bottom:8px;
+    border-top:2px solid var(--border); cursor:pointer; user-select:none;
+  }
+  .grp-row:hover td{background:#262b36;}
+  .grp-row .arrow{
+    display:inline-block; margin-right:8px; transition:transform .15s; font-size:11px;
+  }
+  .grp-row.collapsed .arrow{ transform:rotate(-90deg); }
+  .grp-body-row.hidden{ display:none; }
+  .badge{
+    display:inline-block; padding:2px 8px; border-radius:12px; font-size:11px; font-weight:700;
+    color:#0f1115;
+  }
+  .b-nlh{background:var(--nlh); color:#fff;}
+  .b-plo{background:var(--plo); color:#fff;}
+  .b-flmix{background:var(--flmix); color:#0f1115;}
+  .b-sat{background:var(--sat); color:#0f1115;}
+  .b-special{background:var(--special); color:#0f1115;}
+  .num{color:var(--accent2); font-weight:700;}
+  .fee{white-space:nowrap;}
+  .date-tag{color:var(--muted); font-size:12px;}
+  .chips{color:var(--muted); font-size:12px; white-space:nowrap;}
+  .name{font-weight:600;}
+  .container-wrap{max-width:1100px; margin:0 auto;}
+  .table-scroll{max-height:75vh; overflow:auto; border-radius:8px; -webkit-overflow-scrolling:touch;}
+  .footer-note{color:var(--muted); font-size:12px; margin-top:14px;}
+  a{color:var(--accent2);}
+
+  /* ===== 모바일 대응: 700px 이하에서 테이블 -> 카드형으로 전환 ===== */
+  @media (max-width: 700px){
+    body{padding:12px;}
+    h1{font-size:18px;}
+    .sub{font-size:12px; margin-bottom:14px;}
+    .tab-btn{padding:10px 8px; font-size:12px; white-space:nowrap;}
+    .panel{padding:10px; border-radius:8px;}
+    .desc{font-size:12px; margin-bottom:10px;}
+    .table-scroll{max-height:none; overflow:visible;}
+
+    table, thead, tbody, th, td, tr{ display:block; }
+    thead{ display:none; }
+    tbody tr{
+      border:1px solid var(--border); border-radius:10px; margin-bottom:10px;
+      padding:10px 12px; background:var(--panel2); display:flex; flex-direction:column;
+    }
+    tbody tr:hover{background:var(--panel2);}
+    tbody td{
+      border:none; padding:4px 0; display:flex; justify-content:space-between; align-items:center; gap:8px;
+    }
+    tbody td::before{
+      content: attr(data-label);
+      color:var(--muted); font-size:11px; font-weight:600; flex:0 0 auto;
+    }
+    tbody td.num{ order:1; justify-content:flex-start; }
+    tbody td.num::before{ content:""; }
+    tbody td.name{ order:2; display:block; font-size:15px; margin-bottom:4px; }
+    tbody td.name::before{ content:""; }
+    .grp-row{
+      border-radius:8px; margin-bottom:8px; background:#20242e !important; display:block !important;
+      cursor:pointer;
+    }
+    .grp-row td{ display:block; padding:8px 4px; }
+    .grp-row td::before{ content:""; }
+    .grp-body-row.hidden{ display:none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="container-wrap">
+  <h1>🃏 JOPT 2026 Tokyo #02 — 전체 일정 정리</h1>
+  <div class="sub">2026.07.16(목) ~ 07.20(월) · 베르사르 다카다노바바(신주쿠) · 전체 115개 토너먼트 ·
+    <a href="https://events.japanopenpoker.com/2026-tokyo-02" target="_blank">공식 Players Guide</a>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="sheet1">시트1 · 같은 게임별 · 시간순</button>
+    <button class="tab-btn" data-tab="sheet2">시트2 · 게임 분류별 · 시간순</button>
+    <button class="tab-btn" data-tab="sheet3">시트3 · 금액별 · 시간순</button>
+  </div>
+
+  <div id="sheet1" class="panel active">
+    <div class="desc">동일한 게임명(예: NLH Good Game 1000, PLO 5-Card 등)끼리 묶고, 같은 게임 안에서는 시작 시간 순으로 정렬했어요.</div>
+    <div class="table-scroll"><table id="table1"></table></div>
+  </div>
+
+  <div id="sheet2" class="panel">
+    <div class="desc">NLH / PLO / FL·MIX(클래식·믹스) / Satellite / 기타(Sit&amp;Go 등) 5개 분류로 묶고, 분류 안에서는 시간순으로 정렬했어요.</div>
+    <div class="table-scroll"><table id="table2"></table></div>
+  </div>
+
+  <div id="sheet3" class="panel">
+    <div class="desc">바이인 금액(현금 기준, 티켓 옵션이 있는 경우 현금가로 환산) 오름차순으로 정렬하고, 같은 금액대 안에서는 시간순으로 정렬했어요.</div>
+    <div class="table-scroll"><table id="table3"></table></div>
+  </div>
+
+  <div class="footer-note">
+    ※ 00:00~05:00대 이벤트는 전날 세션의 연장(심야 진행)이라 원래 Players Guide 표기 그대로 해당 날짜 섹션에 포함했습니다.<br>
+    ※ 금액은 "다이렉트 바이인(현금)" 기준이며, 티켓+현금 옵션이 있는 경우 현금 환산액을 기준으로 정렬했습니다.
+  </div>
+</div>
+
+<script>
+const DAY_ORDER = {"07/16":0,"07/17":1,"07/18":2,"07/19":3,"07/20":4};
+
+function sortTime(date, hour, min){
+  const h = hour < 6 ? hour + 24 : hour; // 자정 이후는 전날 세션 연장으로 취급
+  return DAY_ORDER[date]*1440 + h*60 + min;
+}
+
+// {id, name, date, hh, mm, feeText, feeValue, chips}
+const raw = [
+["#02","NLH Warm-up Sponsored by のむシリカ","07/16",16,0,"¥12,000",12000,"30,000"],
+["#03","NLH Millions / Day 1A","07/16",16,0,"1Ticket+¥8,000 or ¥40,000",40000,"50,000"],
+["#04","FL 2-7TD & Badugi Kick off","07/16",16,0,"¥15,000",15000,"30,000"],
+["#05","NLH Good Game 1000","07/16",18,0,"¥100,000",100000,"100,000"],
+["#06","FL T.O.R.S.E.","07/16",18,0,"¥20,000",20000,"40,000"],
+["#07","NLH 3on3","07/16",20,0,"1Ticket+¥9,000 or ¥30,000",30000,"20,000×3"],
+["#08","NLH Bounty Hunter","07/16",20,0,"¥25,000",25000,"50,000"],
+["#09","NLH Couple Tag Team Highroller","07/16",20,0,"¥100,000",100000,"100,000"],
+["#10","PLO Heads-up","07/16",20,0,"¥30,000",30000,"50,000"],
+["#03","NLH Millions / Day 1B","07/16",21,0,"1Ticket+¥8,000 or ¥40,000",40000,"50,000"],
+["#11","NLH 6-max","07/16",21,0,"¥50,000",50000,"80,000"],
+["#12","PLO Prime","07/16",21,0,"¥20,000",20000,"30,000"],
+["#13","FL Dealer's Choice -Triple Draw-","07/16",23,0,"¥20,000",20000,"40,000"],
+["#14","NLH Doublestack Turbo","07/16",0,0,"¥15,000",15000,"60,000"],
+["#15","NL 6-Card Archie Single Draw","07/16",1,0,"¥15,000",15000,"30,000"],
+["#16","NLH Bigstack Hyper","07/16",2,0,"¥10,000",10000,"50,000"],
+["#17","PLO 6+","07/16",3,0,"¥10,000",10000,"30,000"],
+["s01","Satellite to #23 NLH 6-max Championship","07/16",3,0,"¥15,000",15000,"10,000"],
+["★","NLH Sit & Go","07/16",16,0,"¥3,000",3000,"10,000"],
+
+["#03","NLH Millions / Day 1C Turbo","07/17",10,0,"1Ticket+¥8,000 or ¥40,000",40000,"50,000"],
+["#01","NLH Main Event / Day 1A","07/17",11,0,"3Tickets+¥8,000 or ¥120,000",120000,"50,000"],
+["#18","NLH Megastack Sponsored by BLVCK PARIS","07/17",11,0,"¥25,000",25000,"50,000"],
+["#19","FL H.O.R.S.E.","07/17",12,0,"¥30,000",30000,"40,000"],
+["#03","NLH Millions / Day 2 (Restart)","07/17",15,0,"-",0,"-"],
+["#20","NLH Superstack Sponsored by nosh","07/17",15,0,"¥20,000",20000,"50,000"],
+["#21","NLH Heads-up Championship","07/17",15,0,"¥150,000",150000,"100,000"],
+["#22","FL Seven Card Stud Hi/Lo 8 or Better","07/17",16,0,"¥15,000",15000,"30,000"],
+["s02","Satellite to #23 NLH 6-max Championship","07/17",16,0,"¥15,000",15000,"10,000"],
+["#23","NLH 6-max Championship","07/17",17,0,"¥150,000",150000,"100,000"],
+["#01","NLH Main Event / Day 1B","07/17",18,0,"3Tickets+¥8,000 or ¥120,000",120000,"50,000"],
+["#24","PLO Single Day","07/17",18,0,"¥30,000",30000,"40,000"],
+["#25","NLH Tag Team Sponsored by BrewDog","07/17",19,0,"¥40,000",40000,"60,000"],
+["#26","10-Game MIX Championship / Day 1A","07/17",19,0,"¥50,000",50000,"50,000"],
+["#27","NLH Good Game 1000","07/17",20,0,"¥100,000",100000,"100,000"],
+["#28","NLH Deepstack Sponsored by 日本トレカセンター","07/17",21,0,"¥20,000",20000,"30,000"],
+["#29","PL Big-O","07/17",22,0,"¥25,000",25000,"30,000"],
+["#30","NLH Tag Team Turbo Sponsored by クライナー","07/17",23,0,"¥20,000",20000,"40,000"],
+["#31","NLH Good Game 500","07/17",23,0,"¥50,000",50000,"80,000"],
+["#32","FL Archie","07/17",23,0,"¥20,000",20000,"30,000"],
+["#33","NLH Superstack Turbo Sponsored by JOPT MAGAZINE","07/17",0,0,"¥15,000",15000,"50,000"],
+["#34","PLO Double Boards Bombpot","07/17",1,0,"¥15,000",15000,"30,000"],
+["#35","NLH Bigstack Hyper","07/17",2,0,"¥10,000",10000,"50,000"],
+["#36","PL 2-7 Double Draw","07/17",3,0,"¥10,000",10000,"30,000"],
+["s03","Satellite to #45 NLH Optimus","07/17",3,0,"¥20,000",20000,"10,000"],
+["★","NLH Sit & Go","07/17",14,0,"¥3,000",3000,"10,000"],
+
+["#01","NLH Main Event / Day 1C","07/18",11,0,"3Tickets+¥8,000 or ¥120,000",120000,"50,000"],
+["#37","NLH Whopper®Stack Sponsored by BURGER KING","07/18",11,0,"¥30,000",30000,"60,000"],
+["s04","NL2-7SD Satellite to #38 10-Game MIX Highroller","07/18",11,0,"¥10,000",10000,"10,000"],
+["#38","10-Game MIX Highroller","07/18",12,0,"¥100,000",100000,"100,000"],
+["★","JOPT STARS TABLE","07/18",13,0,"-",0,"100,000"],
+["#39","NLH Builder Sponsored by nosh","07/18",15,0,"¥15,000",15000,"30,000"],
+["#40","PLO 6-max","07/18",15,0,"¥30,000",30000,"50,000"],
+["s05","Satellite to #41 NLH Platinum","07/18",15,0,"¥50,000",50000,"20,000"],
+["#41","NLH Platinum Sponsored by APT","07/18",16,0,"¥500,000",500000,"200,000"],
+["#42","FL Triple Draw MIX","07/18",16,0,"¥30,000",30000,"30,000"],
+["#01","NLH Main Event / Day 1D Turbo","07/18",18,0,"3Tickets+¥8,000 or ¥120,000",120000,"50,000"],
+["#43","NLH Mystery Bounty Sponsored by 日本トレカセンター","07/18",18,0,"¥30,000",30000,"50,000"],
+["#44","PLO Tag Team Sponsored by Cardology","07/18",18,0,"¥20,000",20000,"40,000"],
+["s06","Satellite to #45 NLH Optimus","07/18",19,0,"¥20,000",20000,"10,000"],
+["#45","NLH Optimus","07/18",20,0,"¥200,000",200000,"100,000"],
+["#46","NLH Poker Players Championship / Day 1A","07/18",21,0,"¥40,000",40000,"50,000"],
+["#47","NLH Deepstack Sponsored by CHILLERS","07/18",21,0,"¥20,000",20000,"30,000"],
+["#48","PLO Night","07/18",21,0,"¥20,000",20000,"30,000"],
+["#49","FL Dealer's Choice -Drawmaha-","07/18",22,0,"¥20,000",20000,"30,000"],
+["#50","NLH Good Game 500","07/18",23,0,"¥50,000",50000,"80,000"],
+["s07","Flipout Satellite to #51 NLH Gladiator","07/18",23,0,"¥3,000",3000,"-"],
+["#51","NLH Gladiator","07/18",0,0,"¥20,000",20000,"30,000"],
+["#52","PLO 5-Card","07/18",0,0,"¥15,000",15000,"30,000"],
+["#53","NLH Bigstack Hyper","07/18",2,0,"¥10,000",10000,"50,000"],
+["#54","NL 2-7 Single Draw","07/18",2,0,"¥12,000",12000,"30,000"],
+["s08","Satellite to #61 NLH Good Game 1000","07/18",3,0,"¥10,000",10000,"10,000"],
+["★","NLH Sit & Go","07/18",14,0,"¥3,000",3000,"10,000"],
+
+["#01","NLH Main Event / Day 2 (Restart)","07/19",11,0,"-",0,"-"],
+["#46","NLH Poker Players Championship / Day 1B","07/19",11,0,"¥40,000",40000,"50,000"],
+["#55","NLH Megastack","07/19",11,0,"¥25,000",25000,"50,000"],
+["#26","10-Game MIX Championship / Day 1B","07/19",12,0,"¥50,000",50000,"50,000"],
+["#56","NLH Builder Sponsored by nosh","07/19",15,0,"¥15,000",15000,"30,000"],
+["#57","PLO Monster","07/19",15,0,"¥30,000",30000,"50,000"],
+["s09","Satellite to #58 NLH Crown","07/19",15,0,"¥30,000",30000,"10,000"],
+["#58","NLH Crown Sponsored by APT","07/19",16,0,"¥300,000",300000,"200,000"],
+["#46","NLH Poker Players Championship / Day 1C","07/19",17,0,"¥40,000",40000,"50,000"],
+["#59","NLH Arena Sponsored by VITAS","07/19",18,0,"¥25,000",25000,"50,000"],
+["#60","FL Split MIX","07/19",18,0,"¥30,000",30000,"40,000"],
+["s10","Satellite to #61 NLH Good Game 1000","07/19",19,0,"¥10,000",10000,"10,000"],
+["s11","Satellite to #62 PLO Highroller","07/19",19,0,"¥15,000",15000,"10,000"],
+["#61","NLH Good Game 1000 Sponsored by ホテル川久","07/19",20,0,"¥100,000",100000,"100,000"],
+["#62","PLO Highroller","07/19",20,0,"¥150,000",150000,"100,000"],
+["#63","NLH Deepstack Sponsored by タイパ至上主義","07/19",21,0,"¥20,000",20000,"30,000"],
+["#64","FL Triple Draw MIX","07/19",22,0,"¥30,000",30000,"30,000"],
+["#46","NLH Poker Players Championship / Day 1D Turbo","07/19",23,0,"¥40,000",40000,"50,000"],
+["#65","NLH Good Game 500","07/19",23,0,"¥50,000",50000,"80,000"],
+["#66","NLH Turbo","07/19",0,0,"¥12,000",12000,"20,000"],
+["#67","PLO 5-Card Double Boards Bombpot","07/19",0,0,"¥20,000",20000,"20,000"],
+["#68","NLH Bigstack Hyper","07/19",2,0,"¥10,000",10000,"50,000"],
+["#69","PLO 6-Card","07/19",2,0,"¥15,000",15000,"30,000"],
+["s12","Satellite to #72 NLH Super Heavy Bounty","07/19",3,0,"¥15,000",15000,"10,000"],
+["★","NLH Sit & Go","07/19",14,0,"¥3,000",3000,"10,000"],
+
+["#70","NLH Morning Sponsored by nosh","07/20",10,0,"¥10,000",10000,"30,000"],
+["#01","NLH Main Event / Day 3 (Restart)","07/20",11,0,"-",0,"-"],
+["#26","10-Game MIX Championship / Day 2 (Restart)","07/20",11,0,"-",0,"-"],
+["#46","NLH Poker Players Championship / Day 2 (Restart)","07/20",11,0,"-",0,"-"],
+["#71","NLH Monsterstack Sponsored by POKER Q'z","07/20",11,0,"¥30,000",30000,"60,000"],
+["s13","Satellite to #72 NLH Super Heavy Bounty","07/20",11,0,"¥15,000",15000,"10,000"],
+["-","JOPT Fukuoka Main Event Day 1 Tokyo","07/20",11,0,"2Tickets+¥10,000 or ¥80,000",80000,"50,000"],
+["#72","NLH Super Heavy Bounty Sponsored by YA-MAN","07/20",12,0,"¥150,000",150000,"100,000"],
+["#73","NLH Ladies Championship","07/20",12,0,"¥30,000",30000,"50,000"],
+["#74","PLO Championship","07/20",12,0,"¥50,000",50000,"50,000"],
+["#75","FL B.E.S.T.","07/20",12,0,"¥30,000",30000,"40,000"],
+["#76","NLH Deepstack","07/20",14,0,"¥20,000",20000,"30,000"],
+["★","NLH Sit & Go","07/20",14,0,"¥3,000",3000,"10,000"],
+["#77","NLH Good Game 500","07/20",15,0,"¥50,000",50000,"80,000"],
+["#78","FL 2-7 TD & Badugi","07/20",15,0,"¥20,000",20000,"30,000"],
+["#79","PLO 5-Card Double Boards Bombpot","07/20",17,0,"¥15,000",15000,"15,000"],
+["#80","NLH Last Party","07/20",17,0,"¥6,000",6000,"20,000"],
+["#81","NLH Employees","07/20",19,0,"¥3,000",3000,"10,000"]
+];
+
+function category(name){
+  if(name.startsWith("Satellite") || name.startsWith("NL2-7SD Satellite") || name.startsWith("Flipout Satellite")) return "Satellite";
+  if(name.includes("Sit & Go") || name.includes("STARS TABLE") || name.includes("Employees")) return "기타/Special";
+  if(name.startsWith("NLH") || name === "NL 6-Card Archie Single Draw" || name === "NL 2-7 Single Draw" || name.startsWith("JOPT Fukuoka")) return "NLH";
+  if(name.startsWith("PLO") || name.startsWith("PL ")) return "PLO";
+  if(name.startsWith("FL") || name.startsWith("10-Game MIX")) return "FL·MIX";
+  return "기타/Special";
+}
+
+const badgeClass = {
+  "NLH":"b-nlh", "PLO":"b-plo", "FL·MIX":"b-flmix", "Satellite":"b-sat", "기타/Special":"b-special"
+};
+
+const data = raw.map(r=>{
+  const [id,name,date,hh,mm,feeText,feeValue,chips] = r;
+  return {
+    id, name, date, hh, mm, feeText, feeValue, chips,
+    cat: category(name),
+    sort: sortTime(date, hh, mm),
+    timeLabel: (hh<10?"0"+hh:hh)+":"+(mm<10?"0"+mm:mm)
+  };
+});
+
+function headerRow(){
+  return "<thead><tr><th>번호</th><th>게임명</th><th>분류</th><th>날짜</th><th>시간</th><th>바이인</th><th>칩</th></tr></thead>";
+}
+
+function rowHtml(d, gid){
+  return `<tr class="grp-body-row" data-group="${gid}">
+    <td class="num" data-label="번호">${d.id}</td>
+    <td class="name" data-label="">${d.name}</td>
+    <td data-label="분류"><span class="badge ${badgeClass[d.cat]}">${d.cat}</span></td>
+    <td class="date-tag" data-label="날짜">${d.date}</td>
+    <td data-label="시간">${d.timeLabel}</td>
+    <td class="fee" data-label="바이인">${d.feeText}</td>
+    <td class="chips" data-label="칩">${d.chips}</td>
+  </tr>`;
+}
+
+// Sheet1: 같은 게임별(이름 그룹) -> 그룹 내 시간순, 그룹은 이름 가나다순
+function renderSheet1(){
+  const groups = {};
+  data.forEach(d=>{
+    // Day/Restart 표기를 뗀 기본 게임명으로 그룹핑
+    const baseName = d.name.replace(/\s*\/\s*Day.*$/,"").replace(/\s*\(Restart\)$/,"").trim();
+    if(!groups[baseName]) groups[baseName]=[];
+    groups[baseName].push(d);
+  });
+  const names = Object.keys(groups).sort((a,b)=>a.localeCompare(b));
+  let html = headerRow()+"<tbody>";
+  names.forEach((n,idx)=>{
+    const items = groups[n].sort((a,b)=>a.sort-b.sort);
+    const gid = "s1-g"+idx;
+    html += `<tr class="grp-row" data-group="${gid}"><td colspan="7"><span class="arrow">▼</span>🎯 ${n} (${items.length}회)</td></tr>`;
+    items.forEach(d=> html += rowHtml(d, gid));
+  });
+  html += "</tbody>";
+  document.getElementById("table1").innerHTML = html;
+}
+
+// Sheet2: 게임 분류별 -> 분류 내 시간순
+function renderSheet2(){
+  const order = ["NLH","PLO","FL·MIX","Satellite","기타/Special"];
+  let html = headerRow()+"<tbody>";
+  order.forEach((cat,idx)=>{
+    const items = data.filter(d=>d.cat===cat).sort((a,b)=>a.sort-b.sort);
+    if(items.length===0) return;
+    const gid = "s2-g"+idx;
+    html += `<tr class="grp-row" data-group="${gid}"><td colspan="7"><span class="arrow">▼</span>📂 ${cat} (${items.length}개)</td></tr>`;
+    items.forEach(d=> html += rowHtml(d, gid));
+  });
+  html += "</tbody>";
+  document.getElementById("table2").innerHTML = html;
+}
+
+// Sheet3: 금액별 -> 동일 금액대 내 시간순
+function renderSheet3(){
+  const sorted = [...data].sort((a,b)=> a.feeValue - b.feeValue || a.sort - b.sort);
+  let html = headerRow()+"<tbody>";
+  let lastFee = null;
+  let gidx = -1;
+  let gid = "";
+  sorted.forEach(d=>{
+    if(d.feeValue !== lastFee){
+      gidx++;
+      gid = "s3-g"+gidx;
+      html += `<tr class="grp-row" data-group="${gid}"><td colspan="7"><span class="arrow">▼</span>💰 ${d.feeValue===0?"금액 미표기/무료":"¥"+d.feeValue.toLocaleString()+" 대"}</td></tr>`;
+      lastFee = d.feeValue;
+    }
+    html += rowHtml(d, gid);
+  });
+  html += "</tbody>";
+  document.getElementById("table3").innerHTML = html;
+}
+
+renderSheet1();
+renderSheet2();
+renderSheet3();
+
+// 폴드(접기/펼치기) 기능: 그룹 헤더 클릭 시 해당 그룹의 데이터 행 토글
+document.querySelectorAll("table").forEach(table=>{
+  table.addEventListener("click", (e)=>{
+    const grpRow = e.target.closest(".grp-row");
+    if(!grpRow) return;
+    const gid = grpRow.dataset.group;
+    const collapsing = !grpRow.classList.contains("collapsed");
+    grpRow.classList.toggle("collapsed", collapsing);
+    table.querySelectorAll(`.grp-body-row[data-group="${gid}"]`).forEach(row=>{
+      row.classList.toggle("hidden", collapsing);
+    });
+  });
+});
+
+document.querySelectorAll(".tab-btn").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+    document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById(btn.dataset.tab).classList.add("active");
+  });
+});
+</script>
+</body>
+</html>
