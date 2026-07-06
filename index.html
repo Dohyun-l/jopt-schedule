@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -298,7 +298,7 @@ function headerRow(){
 }
 
 function rowHtml(d, gid){
-  return `<tr class="grp-body-row" data-group="${gid}">
+  return `<tr class="grp-body-row hidden" data-group="${gid}">
     <td class="num" data-label="번호">${d.id}</td>
     <td class="name" data-label="">${d.name}</td>
     <td data-label="분류"><span class="badge ${badgeClass[d.cat]}">${d.cat}</span></td>
@@ -323,8 +323,8 @@ function renderSheet1(){
   names.forEach((n,idx)=>{
     const items = groups[n].sort((a,b)=>a.sort-b.sort);
     const gid = "s1-g"+idx;
-    html += `<tr class="grp-row" data-group="${gid}"><td colspan="7"><span class="arrow">▼</span>🎯 ${n} (${items.length}회)</td></tr>`;
-    items.forEach(d=> html += rowHtml(d, gid));
+    html += `<tr class="grp-row collapsed" data-group="${gid}"><td colspan="7"><span class="arrow">▼</span>🎯 ${n} (${items.length}회)</td></tr>`;
+    items.forEach(d=> html += rowHtml(d, gid, true));
   });
   html += "</tbody>";
   document.getElementById("table1").innerHTML = html;
@@ -338,8 +338,8 @@ function renderSheet2(){
     const items = data.filter(d=>d.cat===cat).sort((a,b)=>a.sort-b.sort);
     if(items.length===0) return;
     const gid = "s2-g"+idx;
-    html += `<tr class="grp-row" data-group="${gid}"><td colspan="7"><span class="arrow">▼</span>📂 ${cat} (${items.length}개)</td></tr>`;
-    items.forEach(d=> html += rowHtml(d, gid));
+    html += `<tr class="grp-row collapsed" data-group="${gid}"><td colspan="7"><span class="arrow">▼</span>📂 ${cat} (${items.length}개)</td></tr>`;
+    items.forEach(d=> html += rowHtml(d, gid, true));
   });
   html += "</tbody>";
   document.getElementById("table2").innerHTML = html;
@@ -356,10 +356,10 @@ function renderSheet3(){
     if(d.feeValue !== lastFee){
       gidx++;
       gid = "s3-g"+gidx;
-      html += `<tr class="grp-row" data-group="${gid}"><td colspan="7"><span class="arrow">▼</span>💰 ${d.feeValue===0?"금액 미표기/무료":"¥"+d.feeValue.toLocaleString()+" 대"}</td></tr>`;
+      html += `<tr class="grp-row collapsed" data-group="${gid}"><td colspan="7"><span class="arrow">▼</span>💰 ${d.feeValue===0?"금액 미표기/무료":"¥"+d.feeValue.toLocaleString()+" 대"}</td></tr>`;
       lastFee = d.feeValue;
     }
-    html += rowHtml(d, gid);
+    html += rowHtml(d, gid, true);
   });
   html += "</tbody>";
   document.getElementById("table3").innerHTML = html;
